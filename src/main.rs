@@ -20,6 +20,8 @@ use tracing::warn;
 mod api;
 mod image;
 mod storage;
+#[cfg(any(feature = "rustls", feature = "openssl"))]
+mod tls;
 mod upstream;
 mod util;
 
@@ -44,7 +46,10 @@ struct Config {
 	#[clap(flatten)]
 	upstream: UpstreamConfig,
 	#[clap(subcommand)]
-	storage: StorageConfig
+	storage: StorageConfig,
+	#[cfg(any(feature = "rustls", feature = "openssl"))]
+	#[clap(flatten)]
+	tls: tls::TlsConfig
 }
 
 #[inline]
@@ -146,7 +151,17 @@ async fn main() {
 			.route("/", web::get().to(liveness))
 	});
 	match config.listen {
-		socket_address::Address::Network(addr) => server.shutdown_timeout(10).bind(&addr).unwrap().run().await.unwrap(),
+		socket_address::Address::Network(addr) => {
+			#[cfg(feature = "rustls")]
+			{
+				return server.shutdown_timeout(10).bind_rustls_0_23(&addr, config.tls.builder()).unwrap().run().await.unwrap()
+			}
+			#[cfg(feature = "openssl")]
+			{
+				return server.shutdown_timeout(10).bind_openssl(&addr, config.tls.builder()).unwrap().run().await.unwrap()
+			}
+			return server.shutdown_timeout(10).bind(&addr).unwrap().run().await.unwrap()
+		},
 		socket_address::Address::UnixSocket(path) => server.shutdown_timeout(10).bind_uds(&path).unwrap().run().await.unwrap()
 	};
 	shutdown_tx.send(()).unwrap();

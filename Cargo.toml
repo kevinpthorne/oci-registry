@@ -20,6 +20,10 @@ codegen-units = 1
 name = "main"
 harness = false
 
+[features]
+openssl = ["dep:openssl", "actix-web/openssl"]
+rustls = ["dep:rustls", "dep:rustls-pemfile", "actix-web/rustls-0_23"]
+
 [dependencies]
 actix-web = "4.2.1"
 actix-web-prometheus = { version = "0.1.2", features = ["process"] }
@@ -38,12 +42,15 @@ hex = "0.4.3"
 humantime = "2.1.0"
 lazy-regex = "3.0.0"
 once_cell = { version = "1.18.0", default-features = false, features = ["parking_lot"] }
+openssl = { version = "0.10", optional = true }
 pin-project = "1.1.4"
 prometheus = { version = "0.13.3", default-features = false }
 regex = "1.6.0"
 rusoto_core = { version = "0.48.0", default-features = false, features = ["hyper-rustls", "flate2"] }
 rusoto_credential = "0.48.0"
 rusoto_s3 = { version = "0.48.0", default-features = false, features = ["rustls"] }
+rustls = { version = "0.23.22", optional = true }
+rustls-pemfile = { version = "2.2.0", optional = true }
 serde = { version = "1.0.145", features = ["derive"] }
 serde_json = "1.0.86"
 serde_with = { version = "3.0.0", default-features = false, features = ["hex"] }

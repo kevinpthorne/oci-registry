@@ -8,11 +8,11 @@
 * Two storage back-ends
 	* S3
 	* Local filesystem
+  * nix store
 * Small footprint; in my test system, the official `registry` uses approximately 130 MiB of memory to mirror docker.io; five replicas of `oci-registry` combined use approximately 60 MiB to mirror everything in [example.yaml](example.yaml), plus one private registry.  CPU is negligible for both.
 * A [helm chart][artifacthub]
 
 # Limitations
-* Pushing is not currently implemented; `oci-registry` only supports being a pull-through cache (a mirror) at this time.  Push support is planned.
 * Authentication is not currently implemented, but is planned
 * Only SHA256 content hashes are supported, but supporting other schemes is planned
 * Connecting to `oci-registry` with TLS (https) is not supported and support will not be added.
